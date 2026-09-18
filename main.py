@@ -81,15 +81,19 @@ class SimuladorCajaFuerte(QtWidgets.QWidget):
         self.estados_actuales = {self.estado_inicial}
         self.log = []
 
-        self.btnTabla = QtWidgets.QPushButton("📊 Tabla de estados")
+        self.btnTabla = QtWidgets.QPushButton("Tabla de estados")
         self.btnTabla.setStyleSheet("background-color: #1d1d24; border: 1px solid #33333d; padding: 10px;")
         self.colDerecha.addWidget(self.btnTabla)
         self.btnTabla.clicked.connect(lambda: VentanaTablaEstados(self).exec_())
 
-        self.btnBitacora = QtWidgets.QPushButton("☰ Bitácora de transiciones")
+        self.btnBitacora = QtWidgets.QPushButton("Bitácora de transiciones")
         self.btnBitacora.setStyleSheet("background-color: #1d1d24; border: 1px solid #33333d; padding: 10px; margin-top: 5px;")
         self.colDerecha.addWidget(self.btnBitacora)
         self.btnBitacora.clicked.connect(lambda: VentanaBitacora(self, self.log).exec_())
+
+        self.configurar_tabla_historial()
+        self.colDerecha.setStretch(0, 1)
+        self.colDerecha.setStretch(1, 1)
 
         self.escena = QtWidgets.QGraphicsScene(self)
         self.canvasAFND.setScene(self.escena)
@@ -112,12 +116,22 @@ class SimuladorCajaFuerte(QtWidgets.QWidget):
         self.reiniciar_todo()
 
     def ingresar_simbolo(self, simbolo):
+        if self.buffer == "":
+            self.estados_actuales = {self.estado_inicial}
+            self.log = []
+            self.paso_index = 0
+            self.tablaHistorial.setRowCount(0)
+            self.agregar_fila_historial(0, "—", f"{{{self.estado_inicial}}}", "Estado inicial", tipo='normal')
+            self.lblEstadoActual.setText(f"Estado actual: {self.estado_inicial}")
+            self.lblSimboloActual.setText("Símbolo actual: —")
+            self.dibujar_grafo(self.estados_actuales)
+
         self.buffer += simbolo
         self.lblLCD.setText(' '.join(self.buffer))
         self.lblEstadoInfo.setText("Esperando entrada")
         self.lblAceptada.setVisible(False)
         self.btnPaso.setEnabled(True)
-        self.lblPasoInfo.setText(f"Clave lista ({len(self.buffer)} símbolos). Presiona ⏭ para avanzar paso a paso o ✓ Ingresar para procesar todo de una vez.")
+        self.lblPasoInfo.setText(f"Clave lista ({len(self.buffer)} símbolos). Presiona Avanzar paso a paso o Ingresar para procesar todo de una vez.")
 
     def limpiar_buffer(self):
         self.buffer = ""
@@ -132,9 +146,11 @@ class SimuladorCajaFuerte(QtWidgets.QWidget):
         self.estados_actuales = {self.estado_inicial}
         self.log = []
         self.paso_index = 0
-        for simbolo in self.buffer:
-            self.avanzar_simbolo(simbolo)
-            self.paso_index += 1
+        self.tablaHistorial.setRowCount(0)
+        self.agregar_fila_historial(0, "—", f"{{{self.estado_inicial}}}", "Estado inicial", tipo='normal')
+        for idx, simbolo in enumerate(self.buffer, start=1):
+            self.avanzar_simbolo(simbolo, idx)
+        self.paso_index = len(self.buffer)
         self.lblPasoInfo.setText(f"Clave completa procesada ({len(self.buffer)}/{len(self.buffer)} símbolos).")
         self.finalizar_procesamiento()
 
@@ -143,7 +159,7 @@ class SimuladorCajaFuerte(QtWidgets.QWidget):
             self.lblPasoInfo.setText("No hay más símbolos por procesar. Ingresa una nueva clave o reinicia.")
             return
         simbolo = self.buffer[self.paso_index]
-        self.avanzar_simbolo(simbolo)
+        self.avanzar_simbolo(simbolo, self.paso_index + 1)
         self.paso_index += 1
         self.lblLCD.setText(self.resaltar_progreso())
         if self.paso_index < len(self.buffer):
@@ -158,14 +174,28 @@ class SimuladorCajaFuerte(QtWidgets.QWidget):
         pendientes = self.buffer[self.paso_index:]
         return f"[{' '.join(vistos)}] {' '.join(pendientes)}".strip()
 
-    def avanzar_simbolo(self, simbolo):
+    def avanzar_simbolo(self, simbolo, paso_num=None):
+        if paso_num is None:
+            paso_num = self.paso_index + 1
+
         nuevos_estados = set()
         for estado in self.estados_actuales:
             nuevos_estados |= self.delta.get(estado, {}).get(simbolo, set())
 
-        origen = ", ".join(sorted(self.estados_actuales))
+        origen_set = set(self.estados_actuales)
+        origen = ", ".join(sorted(origen_set))
         destino = ", ".join(sorted(nuevos_estados)) if nuevos_estados else "∅"
         self.log.append(f"{origen} --{simbolo}--> {destino}")
+
+        estados_texto = f"{{{destino}}}" if nuevos_estados else "∅"
+        if not nuevos_estados:
+            tipo = 'bloqueada'
+        elif self.estado_final in nuevos_estados:
+            tipo = 'aceptada'
+        else:
+            tipo = 'normal'
+        explicacion = self.generar_explicacion(origen_set, nuevos_estados)
+        self.agregar_fila_historial(paso_num, simbolo, estados_texto, explicacion, tipo)
 
         self.estados_actuales = nuevos_estados
         texto_estado = f"{{{destino}}}" if nuevos_estados else "∅ (bloqueado)"
@@ -189,6 +219,92 @@ class SimuladorCajaFuerte(QtWidgets.QWidget):
                 self.lblEstadoInfo.setStyleSheet("color: #e63950;")
                 self.lblAceptada.setVisible(False)
 
+    def configurar_tabla_historial(self):
+        tabla = self.tablaHistorial
+        tabla.setColumnCount(4)
+        tabla.setHorizontalHeaderLabels(["Paso", "Símbolo", "Estados", "Explicación"])
+        tabla.verticalHeader().setVisible(False)
+        tabla.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        tabla.setSelectionMode(QtWidgets.QAbstractItemView.NoSelection)
+        tabla.setShowGrid(False)
+        tabla.setWordWrap(True)
+        tabla.setStyleSheet(
+            "QTableWidget { background-color: #141419; border: none; }"
+            "QTableWidget::item { border-bottom: 1px solid #1f1f23; padding: 6px 8px; color: #f4f4f6; }"
+        )
+
+        header = tabla.horizontalHeader()
+        header.setObjectName("headerHistorial")
+        header.setHighlightSections(False)
+        header.setSectionsClickable(False)
+        header.setStyleSheet(
+            "QHeaderView#headerHistorial::section {"
+            " background-color: #1d1d24;"
+            " color: #e0e0e0;"
+            " font-size: 12px;"
+            " font-weight: bold;"
+            " border: 1px solid #1d1d24;"
+            " border-bottom: 1px solid #33333d;"
+            " padding: 6px 8px; }"
+        )
+
+        resize_mode = header.setSectionResizeMode
+        resize_mode(0, QtWidgets.QHeaderView.ResizeToContents)
+        resize_mode(1, QtWidgets.QHeaderView.ResizeToContents)
+        resize_mode(2, QtWidgets.QHeaderView.ResizeToContents)
+        resize_mode(3, QtWidgets.QHeaderView.Stretch)
+
+    def agregar_fila_historial(self, paso, simbolo, estados_texto, explicacion, tipo='normal'):
+        tabla = self.tablaHistorial
+        fila = tabla.rowCount()
+        tabla.insertRow(fila)
+
+        colores_fondo = {
+            'aceptada': QtGui.QColor(38, 61, 48),
+            'bloqueada': QtGui.QColor(61, 30, 36),
+        }
+        colores_texto = {
+            'aceptada': QtGui.QColor("#33c37f"),
+            'bloqueada': QtGui.QColor("#e63950"),
+        }
+
+        for col, valor in enumerate([str(paso), simbolo, estados_texto, explicacion]):
+            item = QtWidgets.QTableWidgetItem(valor)
+            item.setTextAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+            if tipo in colores_fondo:
+                item.setBackground(QtGui.QBrush(colores_fondo[tipo]))
+                item.setForeground(QtGui.QBrush(colores_texto[tipo]))
+            else:
+                item.setForeground(QtGui.QBrush(QtGui.QColor("#f4f4f6")))
+            tabla.setItem(fila, col, item)
+
+        tabla.resizeRowsToContents()
+        tabla.scrollToBottom()
+
+    def generar_explicacion(self, origen, destino):
+        if not destino:
+            return "Ninguna ruta continúa activa: la clave se bloquea."
+        if self.estado_final in destino:
+            if self.estado_final in origen:
+                return "Se mantiene una ruta en el estado de aceptación."
+            return "Una ruta llega al estado de aceptación."
+
+        agregados = destino - origen
+        descartados = origen - destino
+        if not agregados and not descartados:
+            return "Las rutas activas se mantienen sin cambios."
+
+        partes = []
+        if agregados:
+            verbo = "aparece" if len(agregados) == 1 else "aparecen"
+            partes.append(f"{verbo} {', '.join(sorted(agregados))}")
+        if descartados:
+            verbo = "se descarta" if len(descartados) == 1 else "se descartan"
+            partes.append(f"{verbo} {', '.join(sorted(descartados))}")
+
+        texto = " y ".join(partes)
+        return texto[0].upper() + texto[1:] + "."
+
     def actualizar_transiciones_posibles(self):
         lineas = []
         for estado in sorted(self.estados_actuales):
@@ -208,6 +324,8 @@ class SimuladorCajaFuerte(QtWidgets.QWidget):
         self.lblEstadoInfo.setStyleSheet("color: #e63950;")
         self.lblAceptada.setVisible(False)
         self.txtTransiciones.clear()
+        self.tablaHistorial.setRowCount(0)
+        self.agregar_fila_historial(0, "—", f"{{{self.estado_inicial}}}", "Estado inicial", tipo='normal')
         self.btnPaso.setEnabled(False)
         self.lblPasoInfo.setText("Ingresa una clave y presiona el botón para avanzar símbolo por símbolo.")
         self.dibujar_grafo(self.estados_actuales)

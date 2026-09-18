@@ -89,8 +89,8 @@
         <item>
          <layout class="QHBoxLayout" name="filaAcciones">
           <property name="spacing"><number>10</number></property>
-          <item><widget class="QPushButton" name="btnClear"><property name="text"><string>🧹 Limpiar</string></property></widget></item>
-          <item><widget class="QPushButton" name="btnEnter"><property name="text"><string>✓ Ingresar</string></property></widget></item>
+          <item><widget class="QPushButton" name="btnClear"><property name="text"><string>Limpiar</string></property></widget></item>
+          <item><widget class="QPushButton" name="btnEnter"><property name="text"><string>Ingresar</string></property></widget></item>
          </layout>
         </item>
        </layout>
@@ -105,14 +105,14 @@
         <property name="rightMargin"><number>16</number></property>
         <property name="bottomMargin"><number>16</number></property>
         <property name="spacing"><number>6</number></property>
-        <item><widget class="QPushButton" name="btnPaso"><property name="text"><string>⏭ Avanzar paso a paso</string></property></widget></item>
+        <item><widget class="QPushButton" name="btnPaso"><property name="text"><string>Avanzar paso a paso</string></property></widget></item>
         <item><widget class="QLabel" name="lblPasoInfo"><property name="text"><string>Ingresa una clave y presiona el botón para avanzar símbolo por símbolo.</string></property><property name="wordWrap"><bool>true</bool></property></widget></item>
        </layout>
       </widget>
      </item>
 
-     <item><widget class="QPushButton" name="btnReiniciar"><property name="text"><string>↺ Reiniciar</string></property></widget></item>
-     <item><widget class="QPushButton" name="btnSalir"><property name="text"><string>↩ Salir</string></property></widget></item>
+     <item><widget class="QPushButton" name="btnReiniciar"><property name="text"><string>Reiniciar</string></property></widget></item>
+     <item><widget class="QPushButton" name="btnSalir"><property name="text"><string>Salir</string></property></widget></item>
      <item><spacer><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
     </layout>
    </item>
@@ -140,7 +140,7 @@
          </layout>
         </item>
         <item><widget class="QGraphicsView" name="canvasAFND"/></item>
-        <item><widget class="QLabel" name="lblLeyenda"><property name="text"><string>🔴 Estado activo    ⚪ Estado inactivo    ◎ Doble círculo = estado de aceptación (q5)</string></property></widget></item>
+        <item><widget class="QLabel" name="lblLeyenda"><property name="text"><string>Estado activo: rojo    Estado inactivo: gris    Doble círculo = estado de aceptación (q5)</string></property></widget></item>
        </layout>
       </widget>
      </item>
@@ -153,7 +153,7 @@
         <property name="topMargin"><number>16</number></property>
         <property name="rightMargin"><number>16</number></property>
         <property name="bottomMargin"><number>16</number></property>
-        <item><widget class="QLabel" name="lblAceptada"><property name="text"><string>✓ Cadena aceptada</string></property><property name="styleSheet"><string>color: #33c37f; font-size: 16px; font-weight: bold;</string></property></widget></item>
+        <item><widget class="QLabel" name="lblAceptada"><property name="text"><string>Cadena aceptada</string></property><property name="styleSheet"><string>color: #33c37f; font-size: 16px; font-weight: bold;</string></property></widget></item>
         <item><spacer><property name="orientation"><enum>Qt::Horizontal</enum></property></spacer></item>
        </layout>
       </widget>
@@ -165,18 +165,33 @@
    <item>
     <layout class="QVBoxLayout" name="colDerecha">
      <property name="spacing"><number>14</number></property>
-     <property name="sizeConstraint"><enum>QLayout::SetFixedSize</enum></property>
 
      <item>
       <widget class="QFrame" name="panel">
+       <property name="sizePolicy"><sizepolicy hsizetype="Preferred" vsizetype="Expanding"><horstretch>0</horstretch><verstretch>1</verstretch></sizepolicy></property>
        <layout class="QVBoxLayout">
         <property name="leftMargin"><number>16</number></property>
         <property name="topMargin"><number>16</number></property>
         <property name="rightMargin"><number>16</number></property>
         <property name="bottomMargin"><number>16</number></property>
         <property name="spacing"><number>8</number></property>
-        <item><widget class="QLabel" name="titulo"><property name="text"><string>➔ Transiciones posibles</string></property></widget></item>
+        <item><widget class="QLabel" name="titulo"><property name="text"><string>Transiciones posibles</string></property></widget></item>
         <item><widget class="QTextEdit" name="txtTransiciones"><property name="readOnly"><bool>true</bool></property></widget></item>
+       </layout>
+      </widget>
+     </item>
+
+     <item>
+      <widget class="QFrame" name="panel">
+       <property name="sizePolicy"><sizepolicy hsizetype="Preferred" vsizetype="Expanding"><horstretch>0</horstretch><verstretch>1</verstretch></sizepolicy></property>
+       <layout class="QVBoxLayout">
+        <property name="leftMargin"><number>16</number></property>
+        <property name="topMargin"><number>16</number></property>
+        <property name="rightMargin"><number>16</number></property>
+        <property name="bottomMargin"><number>16</number></property>
+        <property name="spacing"><number>8</number></property>
+        <item><widget class="QLabel" name="titulo"><property name="text"><string>Historial de simulación</string></property></widget></item>
+        <item><widget class="QTableWidget" name="tablaHistorial"/></item>
        </layout>
       </widget>
      </item>
