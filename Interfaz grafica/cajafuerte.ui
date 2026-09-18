@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CajaFuerte</class>
+ <widget class="QWidget" name="CajaFuerte">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1280</width>
+    <height>760</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Simulador de Caja Fuerte - AFND</string>
+  </property>
+  <property name="styleSheet">
+   <string>
+    QWidget { background-color: #0b0b0e; color: #f4f4f6; font-family: &quot;Segoe UI&quot;; }
+    QFrame#panel { background-color: #141419; border: 1px solid #2a1a1f; border-radius: 8px; }
+    QLabel { border: none; background: transparent; }
+    QLabel#titulo { font-weight: bold; font-size: 14px; color: #f4f4f6; }
+    QPushButton { background-color: #1d1d24; border: 1px solid #33333d; border-radius: 4px; font-weight: bold; font-size: 14px; padding: 10px; }
+    QPushButton:hover { background-color: #26262f; }
+    QPushButton#btnProcesar, QPushButton#btnEnter { background-color: #e63950; border: none; }
+    QPushButton#btnProcesar:hover, QPushButton#btnEnter:hover { background-color: #c62339; }
+    QGraphicsView { background-color: #141419; border: none; }
+    QTextEdit { background-color: #17171d; border: 1px solid #2a1a1f; font-family: &quot;Consolas&quot;; }
+   </string>
+  </property>
+  
+  <layout class="QHBoxLayout" name="mainLayout">
+   
+   <!-- COLUMNA IZQUIERDA -->
+   <item>
+    <layout class="QVBoxLayout" name="colIzquierda">
+     <property name="sizeConstraint"><enum>QLayout::SetFixedSize</enum></property>
+     
+     <item>
+      <widget class="QFrame" name="panel">
+       <layout class="QVBoxLayout">
+        <item>
+         <widget class="QFrame" name="pantallaLCD">
+          <property name="minimumSize"><size><width>268</width><height>128</height></size></property>
+          <property name="styleSheet"><string>background-color: #050506; border-radius: 14px;</string></property>
+          <layout class="QVBoxLayout">
+           <item><widget class="QLabel" name="lblLCD"><property name="text"><string>Esperando clave...</string></property><property name="alignment"><set>Qt::AlignCenter</set></property><property name="styleSheet"><string>color: #8d8d97; font-family: Consolas;</string></property></widget></item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     
+     <item>
+      <widget class="QFrame" name="panel">
+       <layout class="QGridLayout" name="gridTeclado">
+        <item row="1" column="0"><widget class="QPushButton" name="btn1"><property name="text"><string>1</string></property></widget></item>
+        <item row="1" column="1"><widget class="QPushButton" name="btn2"><property name="text"><string>2</string></property></widget></item>
+        <item row="1" column="2"><widget class="QPushButton" name="btn3"><property name="text"><string>3</string></property></widget></item>
+        <item row="2" column="1"><widget class="QPushButton" name="btn4"><property name="text"><string>4</string></property></widget></item>
+        <item row="4" column="1"><widget class="QPushButton" name="btnA"><property name="text"><string>A</string></property></widget></item>
+        <item row="5" column="0"><widget class="QPushButton" name="btnLock"><property name="text"><string>LOCK</string></property></widget></item>
+        <item row="5" column="1"><widget class="QPushButton" name="btnClear"><property name="text"><string>CLEAR</string></property></widget></item>
+        <item row="5" column="2"><widget class="QPushButton" name="btnEnter"><property name="text"><string>ENTER</string></property></widget></item>
+       </layout>
+      </widget>
+     </item>
+     
+     <item><widget class="QPushButton" name="btnProcesar"><property name="text"><string>▶ Procesar</string></property></widget></item>
+     <item><widget class="QPushButton" name="btnPaso"><property name="text"><string>⏭ Avanzar paso a paso</string></property></widget></item>
+     <item><widget class="QPushButton" name="btnReiniciar"><property name="text"><string>↺ Reiniciar</string></property></widget></item>
+     <item><widget class="QPushButton" name="btnSalir"><property name="text"><string>↩ Salir</string></property></widget></item>
+     <item><spacer><property name="orientation"><enum>Qt::Vertical</enum></property></spacer></item>
+    </layout>
+   </item>
+
+   <!-- COLUMNA CENTRAL -->
+   <item>
+    <layout class="QVBoxLayout" name="colCentro">
+     <item>
+      <widget class="QFrame" name="panel">
+       <layout class="QVBoxLayout">
+        <item><widget class="QLabel" name="titulo"><property name="text"><string>⬡ AUTÓMATA FINITO NO DETERMINISTA</string></property></widget></item>
+        <item>
+         <layout class="QHBoxLayout">
+          <item><widget class="QLabel"><property name="text"><string>Estado actual: q0</string></property></widget></item>
+          <item><widget class="QLabel"><property name="text"><string>Símbolo actual: —</string></property></widget></item>
+          <item><widget class="QLabel"><property name="text"><string>Esperando entrada</string></property><property name="styleSheet"><string>color: #e63950;</string></property></widget></item>
+         </layout>
+        </item>
+        <item><widget class="QGraphicsView" name="canvasAFND"/></item>
+       </layout>
+      </widget>
+     </item>
+     
+     <item>
+      <widget class="QFrame" name="panel">
+       <property name="maximumSize"><size><width>16777215</width><height>100</height></size></property>
+       <layout class="QHBoxLayout">
+        <item><widget class="QLabel" name="lblAceptada"><property name="text"><string>✓ Cadena aceptada</string></property><property name="styleSheet"><string>color: #33c37f; font-size: 16px; font-weight: bold;</string></property></widget></item>
+        <item><widget class="QLabel"><property name="text"><string>Validación: Símbolos permitidos 1-4, A</string></property></widget></item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+
+   <!-- COLUMNA DERECHA -->
+   <item>
+    <layout class="QVBoxLayout" name="colDerecha">
+     <property name="sizeConstraint"><enum>QLayout::SetFixedSize</enum></property>
+
+     
+     <item>
+      <widget class="QFrame" name="panel">
+       <layout class="QVBoxLayout">
+        <item><widget class="QLabel" name="titulo"><property name="text"><string>➔ Transiciones posibles</string></property></widget></item>
+        <item><widget class="QTextEdit" name="txtTransiciones"><property name="readOnly"><bool>true</bool></property></widget></item>
+       </layout>
+      </widget>
+     </item>
+     
+    </layout>
+   </item>
+
+  </layout>
+ </widget>
+</ui>
